@@ -82,6 +82,9 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
 
+  # Type-safe platform channel code generation (Pigeon 2026)
+  pigeon: ^26.3.3
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
