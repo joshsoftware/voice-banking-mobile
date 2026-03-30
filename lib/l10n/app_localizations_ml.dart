@@ -372,4 +372,50 @@ class AppLocalizationsMl extends AppLocalizations {
   @override
   String get imageDescriptionWomenDiwaliCelebration =>
       'പിങ്ക് പാരമ്പര്യ വസ്ത്രത്തിൽ ഒരു സ്ത്രീ തിളക്കമുള്ള എണ്ണ വിളക്കുകളാൽ ചുറ്റപ്പെട്ട നിലത്ത് സുന്ദരമായ വർണ്ണ രംഗോലി സൃഷ്ടിക്കുന്നു.';
+
+  @override
+  String get voiceConversationStartHint =>
+      'Say \"Hey, Fin\" \nto start conversation';
+
+  @override
+  String get voiceConversationListeningHint => 'Listening… tap mic to stop';
+
+  @override
+  String get voiceSessionConnecting => 'Connecting…';
+
+  @override
+  String get voiceSessionReady => 'Ready — ask Fin anything';
+
+  @override
+  String get voiceSessionListening => 'Listening… speak anytime';
+
+  @override
+  String get voiceSessionHearingYou => 'Hearing you…';
+
+  @override
+  String get voiceSessionUnderstanding => 'Understanding…';
+
+  @override
+  String get voiceSessionThinking => 'Thinking…';
+
+  @override
+  String get voiceSessionPreparingReply => 'Preparing reply…';
+
+  @override
+  String get voiceSessionFinSpeaking => 'Fin is speaking…';
+
+  @override
+  String get voiceSessionLiveYou => 'You';
+
+  @override
+  String get voiceSessionLiveAssistant => 'Fin';
+
+  @override
+  String get voiceSessionMicMuted => 'Mic is muted';
+
+  @override
+  String get voiceMicMuteLabel => 'Mute mic';
+
+  @override
+  String get voiceMicUnmuteLabel => 'Unmute mic';
 }

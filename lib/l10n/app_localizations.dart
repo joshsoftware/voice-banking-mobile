@@ -737,6 +737,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A woman in pink traditional clothing carefully creates a beautiful, colorful rangoli on the ground surrounded by glowing oil lamps.'**
   String get imageDescriptionWomenDiwaliCelebration;
+
+  /// No description provided for @voiceConversationStartHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Say \"Hey, Fin\" \nto start conversation'**
+  String get voiceConversationStartHint;
+
+  /// No description provided for @voiceConversationListeningHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening… tap mic to stop'**
+  String get voiceConversationListeningHint;
+
+  /// No description provided for @voiceSessionConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting…'**
+  String get voiceSessionConnecting;
+
+  /// No description provided for @voiceSessionReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready — ask Fin anything'**
+  String get voiceSessionReady;
+
+  /// No description provided for @voiceSessionListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening… speak anytime'**
+  String get voiceSessionListening;
+
+  /// No description provided for @voiceSessionHearingYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Hearing you…'**
+  String get voiceSessionHearingYou;
+
+  /// No description provided for @voiceSessionUnderstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Understanding…'**
+  String get voiceSessionUnderstanding;
+
+  /// No description provided for @voiceSessionThinking.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking…'**
+  String get voiceSessionThinking;
+
+  /// No description provided for @voiceSessionPreparingReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing reply…'**
+  String get voiceSessionPreparingReply;
+
+  /// No description provided for @voiceSessionFinSpeaking.
+  ///
+  /// In en, this message translates to:
+  /// **'Fin is speaking…'**
+  String get voiceSessionFinSpeaking;
+
+  /// No description provided for @voiceSessionLiveYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get voiceSessionLiveYou;
+
+  /// No description provided for @voiceSessionLiveAssistant.
+  ///
+  /// In en, this message translates to:
+  /// **'Fin'**
+  String get voiceSessionLiveAssistant;
+
+  /// No description provided for @voiceSessionMicMuted.
+  ///
+  /// In en, this message translates to:
+  /// **'Mic is muted'**
+  String get voiceSessionMicMuted;
+
+  /// No description provided for @voiceMicMuteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute mic'**
+  String get voiceMicMuteLabel;
+
+  /// No description provided for @voiceMicUnmuteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmute mic'**
+  String get voiceMicUnmuteLabel;
 }
 
 class _AppLocalizationsDelegate
