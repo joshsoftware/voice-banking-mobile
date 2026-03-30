@@ -1,10 +1,16 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/logging/app_logger.dart';
+import '../../core/pipecat/pipecat_controller.dart';
+import '../../core/pipecat/pipecat_events.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
 import 'voice_bank_home_view_model.dart';
+import 'voice_session_notifier.dart';
 
 String _formatCurrency(double amount) {
   final parts = amount.toStringAsFixed(2).split('.');
@@ -20,6 +26,67 @@ String _formatCurrency(double amount) {
     }
   }
   return '₹${buffer.toString().split('').reversed.join()}.$decPart';
+}
+
+String _voicePrimaryStatusLine(
+  AppLocalizations l10n,
+  VoiceSessionState session,
+  BotProcessingState botState,
+  bool userSpeaking,
+  bool micMuted,
+) {
+  if (session.isBusy) return l10n.voiceSessionConnecting;
+  if (!session.isActive) return l10n.voiceConversationStartHint;
+  if (micMuted) return l10n.voiceSessionMicMuted;
+  if (userSpeaking) return l10n.voiceSessionHearingYou;
+  switch (botState) {
+    case BotProcessingState.speaking:
+      return l10n.voiceSessionFinSpeaking;
+    case BotProcessingState.ttsSynthesizing:
+      return l10n.voiceSessionPreparingReply;
+    case BotProcessingState.ttsDone:
+      return l10n.voiceSessionListening;
+    case BotProcessingState.llmProcessing:
+      return l10n.voiceSessionThinking;
+    case BotProcessingState.llmDone:
+      return l10n.voiceSessionPreparingReply;
+    case BotProcessingState.ready:
+    case BotProcessingState.connected:
+      return l10n.voiceSessionReady;
+    case BotProcessingState.disconnected:
+    case BotProcessingState.silent:
+      return l10n.voiceSessionListening;
+  }
+}
+
+String? _voiceSecondaryCaption({
+  required bool sessionActive,
+  required bool userSpeaking,
+  required BotProcessingState botState,
+  required String userT,
+  required String botT,
+  required String llm,
+}) {
+  if (!sessionActive) return null;
+  if (userSpeaking && userT.isNotEmpty) return userT;
+  if (botState == BotProcessingState.speaking ||
+      botState == BotProcessingState.ttsSynthesizing ||
+      botState == BotProcessingState.ttsDone) {
+    if (botT.isNotEmpty) return botT;
+    if (llm.isNotEmpty) return llm;
+  }
+  if (botState == BotProcessingState.llmProcessing && llm.isNotEmpty) {
+    return llm;
+  }
+  if (userT.isNotEmpty) return userT;
+  return null;
+}
+
+String _truncateCaption(String s, {int max = 140}) {
+  final t = s.trim();
+  if (t.isEmpty) return '';
+  if (t.length <= max) return t;
+  return '${t.substring(0, max)}…';
 }
 
 class _HomeColors {
@@ -210,7 +277,7 @@ class VoiceBankHomeScreen extends ConsumerWidget {
               ),
             ),
           ),
-          const Expanded(child: _VoiceBottomSheet()),
+          const Expanded(child: _VoiceBottomSheetContent()),
         ],
       ),
     );
@@ -385,11 +452,71 @@ class _FigmaBalanceCard extends StatelessWidget {
 // ---------------------------------------------------------------------------
 // Figma 114:1725 — Voice bottom sheet ("Say Hey, Fin")
 // ---------------------------------------------------------------------------
-class _VoiceBottomSheet extends StatelessWidget {
-  const _VoiceBottomSheet();
+class _VoiceBottomSheetContent extends ConsumerStatefulWidget {
+  const _VoiceBottomSheetContent();
+
+  @override
+  ConsumerState<_VoiceBottomSheetContent> createState() =>
+      _VoiceBottomSheetContentState();
+}
+
+class _VoiceBottomSheetContentState extends ConsumerState<_VoiceBottomSheetContent>
+    with TickerProviderStateMixin {
+  static const _tag = 'Pipecat/HomeUI';
+
+  late final AnimationController _bars;
+
+  @override
+  void initState() {
+    super.initState();
+    _bars = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _bars.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<VoiceSessionState>(voiceSessionProvider, (previous, next) {
+      if (next.lastError != null && next.lastError != previous?.lastError) {
+        AppLogger.e(_tag, 'session error: ${AppLogger.preview(next.lastError)}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.lastError!)),
+        );
+      }
+      if (previous?.isActive != next.isActive) {
+        AppLogger.i(
+          _tag,
+          'session active changed: ${previous?.isActive} -> ${next.isActive}',
+        );
+      }
+      if (previous?.isBusy != next.isBusy) {
+        AppLogger.d(
+          _tag,
+          'session busy changed: ${previous?.isBusy} -> ${next.isBusy}',
+        );
+      }
+    });
+
+    final session = ref.watch(voiceSessionProvider);
+    final micMuted = ref.watch(voiceMicMutedProvider);
+    final pipecat = ref.watch(pipecatControllerProvider);
+    final l10n = AppLocalizations.of(context)!;
+
+    final merged = Listenable.merge([
+      pipecat.userTranscript,
+      pipecat.botTranscript,
+      pipecat.botState,
+      pipecat.userSpeaking,
+      pipecat.llmBuffer,
+    ]);
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -408,74 +535,314 @@ class _VoiceBottomSheet extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(30, 8, 30, 8),
-          child: Column(
-            children: [
-              Container(
-                width: 40,
-                height: 2,
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-              const SizedBox(height: 76),
-              const _MicPillButton(),
-              const SizedBox(height: 60),
-              const Text(
-                'Say "Hey, Fin" \nto start conversation',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: _HomeColors.sectionTitle,
-                  height: 28 / 18,
-                ),
-              ),
-              const Spacer(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+          padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+          child: ListenableBuilder(
+            listenable: merged,
+            builder: (context, _) {
+              final userSpeaking = pipecat.userSpeaking.value;
+              final botState = pipecat.botState.value;
+              final userT = pipecat.userTranscript.value;
+              final botT = pipecat.botTranscript.value;
+              final llm = pipecat.llmBuffer.value;
+
+              final primary = _voicePrimaryStatusLine(
+                l10n,
+                session,
+                botState,
+                userSpeaking,
+                micMuted,
+              );
+              final secondary = _voiceSecondaryCaption(
+                sessionActive: session.isActive,
+                userSpeaking: userSpeaking,
+                botState: botState,
+                userT: userT,
+                botT: botT,
+                llm: llm,
+              );
+
+              final botTalking = botState == BotProcessingState.speaking ||
+                  botState == BotProcessingState.ttsSynthesizing;
+              final barIntensity = !session.isActive && !session.isBusy
+                  ? 0.0
+                  : session.isBusy
+                      ? 0.55
+                      : userSpeaking
+                          ? 1.0
+                          : botTalking
+                              ? 0.82
+                              : 0.32;
+
+              return Column(
                 children: [
-                  Text(
-                    'Tap to mute',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
-                      color: _HomeColors.sectionTitle.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
                   Container(
                     width: 40,
-                    height: 40,
+                    height: 2,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF5F7FA),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 15,
-                          offset: const Offset(0, 10),
+                      color: Colors.black.withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  if (session.isActive || session.isBusy)
+                    _VoiceSessionWaveform(
+                      animation: _bars,
+                      intensity: barIntensity,
+                      activeColor: _HomeColors.linkBlue,
+                    ),
+                  const SizedBox(height: 16),
+                  _MicPillButton(
+                    isBusy: session.isBusy,
+                    isActive: session.isActive,
+                    onTap: () => ref
+                        .read(voiceSessionProvider.notifier)
+                        .toggleMicSession(),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    primary,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: _HomeColors.sectionTitle,
+                      height: 28 / 18,
+                    ),
+                  ),
+                  if (session.isActive) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      l10n.voiceConversationListeningHint,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                        color: _HomeColors.sectionTitle.withValues(alpha: 0.55),
+                        height: 18 / 13,
+                      ),
+                    ),
+                  ],
+                  if (secondary != null && secondary.trim().isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    _VoiceLiveCaptionCard(
+                      labelUser: l10n.voiceSessionLiveYou,
+                      labelAssistant: l10n.voiceSessionLiveAssistant,
+                      userSpeaking: userSpeaking,
+                      botTalking: botTalking ||
+                          botState == BotProcessingState.llmProcessing,
+                      text: _truncateCaption(secondary),
+                    ),
+                  ],
+                  const Spacer(),
+                  Opacity(
+                    opacity: session.isActive && !session.isBusy ? 1 : 0.4,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          micMuted
+                              ? l10n.voiceMicUnmuteLabel
+                              : l10n.voiceMicMuteLabel,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: _HomeColors.sectionTitle.withValues(alpha: 0.5),
+                          ),
                         ),
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 6,
-                          offset: const Offset(0, 4),
+                        const SizedBox(width: 8),
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: session.isActive && !session.isBusy
+                                ? () {
+                                    final nextMuted =
+                                        !ref.read(voiceMicMutedProvider);
+                                    ref
+                                        .read(voiceMicMutedProvider.notifier)
+                                        .state = nextMuted;
+                                    ref
+                                        .read(pipecatControllerProvider)
+                                        .enableMic(!nextMuted);
+                                  }
+                                : null,
+                            customBorder: const CircleBorder(),
+                            child: Ink(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: micMuted
+                                    ? _HomeColors.linkBlue.withValues(alpha: 0.12)
+                                    : const Color(0xFFF5F7FA),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.08),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                micMuted ? Icons.mic_off_rounded : Icons.mic_none_rounded,
+                                size: 22,
+                                color: micMuted
+                                    ? _HomeColors.linkBlue
+                                    : _HomeColors.sectionTitle.withValues(alpha: 0.75),
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                    alignment: Alignment.center,
-                    child: const Icon(
-                      Icons.volume_up,
-                      size: 20,
-                      color: _HomeColors.linkBlue,
-                    ),
                   ),
                 ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _VoiceSessionWaveform extends StatelessWidget {
+  const _VoiceSessionWaveform({
+    required this.animation,
+    required this.intensity,
+    required this.activeColor,
+  });
+
+  final Animation<double> animation;
+  final double intensity;
+  final Color activeColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        final t = animation.value * 2 * math.pi;
+        const n = 5;
+        const maxH = 36.0;
+        const minH = 6.0;
+        // Fixed slot height so bar animation does not shift layout below.
+        return SizedBox(
+          height: maxH,
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(n, (i) {
+                final phase = t + i * 0.95;
+                final wave = 0.5 + 0.5 * math.sin(phase);
+                final h = minH + (maxH - minH) * wave * intensity;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 3),
+                  child: Container(
+                    width: 5,
+                    height: h,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(3),
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          activeColor.withValues(alpha: 0.35 + 0.4 * intensity),
+                          activeColor.withValues(alpha: 0.85),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _VoiceLiveCaptionCard extends StatelessWidget {
+  const _VoiceLiveCaptionCard({
+    required this.labelUser,
+    required this.labelAssistant,
+    required this.userSpeaking,
+    required this.botTalking,
+    required this.text,
+  });
+
+  final String labelUser;
+  final String labelAssistant;
+  final bool userSpeaking;
+  final bool botTalking;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = userSpeaking
+        ? _HomeColors.linkBlue
+        : botTalking
+            ? const Color(0xFF2E8B57)
+            : _HomeColors.sectionTitle.withValues(alpha: 0.45);
+    final label = userSpeaking
+        ? labelUser
+        : botTalking
+            ? labelAssistant
+            : labelAssistant;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOut,
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF4F9FF),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: accent.withValues(alpha: 0.35),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: accent,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.6,
+                  color: accent,
+                ),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 8),
+          Text(
+            text,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 14,
+              height: 1.35,
+              fontWeight: FontWeight.w500,
+              color: _HomeColors.sectionTitle.withValues(alpha: 0.92),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -485,51 +852,103 @@ class _VoiceBottomSheet extends StatelessWidget {
 // Figma 114:1730 — Mic pill button inside voice sheet
 // ---------------------------------------------------------------------------
 class _MicPillButton extends StatelessWidget {
-  const _MicPillButton();
+  const _MicPillButton({
+    required this.isBusy,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  final bool isBusy;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  static const _greenActive = Color(0xFF2E8B57);
+  static const _greenActiveDeep = Color(0xFF1B5E3A);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 207,
-      height: 82,
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(52),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 4,
-            offset: const Offset(0, 3),
-          ),
-          const BoxShadow(
-            color: Color(0xFFEFEFEF),
-            blurRadius: 4,
-            offset: Offset(0.5, -5),
-          ),
-        ],
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(9999),
-          gradient: const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              _HomeColors.sheetGradientTop,
-              _HomeColors.sheetGradientBottom,
-            ],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF1A4568).withValues(alpha: 0.5),
-              blurRadius: 50,
-              offset: const Offset(0, 25),
+    final ringAlpha = isActive && !isBusy ? 0.16 : 0.08;
+
+    return Opacity(
+      opacity: isBusy ? 0.65 : 1,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: isBusy ? null : onTap,
+          borderRadius: BorderRadius.circular(52),
+          splashColor: Colors.white.withValues(alpha: 0.2),
+          highlightColor: Colors.white.withValues(alpha: 0.08),
+          child: Ink(
+            width: 207,
+            height: 82,
+            padding: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(52),
+              border: Border.all(
+                width: 1,
+                color: _HomeColors.linkBlue.withValues(alpha: ringAlpha),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.07),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+                BoxShadow(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  blurRadius: 2,
+                  offset: const Offset(0, -1),
+                ),
+              ],
             ),
-          ],
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(9999),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: isActive
+                      ? const [
+                          Color(0xFF3CB371),
+                          _greenActive,
+                          _greenActiveDeep,
+                        ]
+                      : const [
+                          Color(0xFF2A82C9),
+                          _HomeColors.sheetGradientTop,
+                          _HomeColors.sheetGradientBottom,
+                        ],
+                  stops: isActive ? const [0.0, 0.45, 1.0] : const [0.0, 0.5, 1.0],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: (isActive ? _greenActiveDeep : const Color(0xFF13324A))
+                        .withValues(alpha: isActive ? 0.45 : 0.4),
+                    blurRadius: isActive ? 16 : 14,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: isBusy
+                    ? const SizedBox(
+                        width: 28,
+                        height: 28,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Icon(
+                        isActive ? Icons.stop_rounded : Icons.mic_rounded,
+                        size: 30,
+                        color: Colors.white,
+                      ),
+              ),
+            ),
+          ),
         ),
-        alignment: Alignment.center,
-        child: const Icon(Icons.mic, size: 28, color: Colors.white),
       ),
     );
   }
