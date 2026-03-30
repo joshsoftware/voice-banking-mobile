@@ -103,5 +103,20 @@
   "imageDescriptionPeopleDiwaliCelebration": "ಜನರು ಸಾಂಪ್ರದಾಯಿಕ ಪೋಷಾಕಿನಲ್ಲಿ ಅಲಂಕೃತ ಬೀದಿಯಲ್ಲಿ ದೀಪಾವಳಿ ಆಚರಿಸುತ್ತಿದ್ದಾರೆ, ಜೀವಂತ ಲ್ಯಾಂಟರ್ನ್‌ಗಳು, ಉರಿಯುತ್ತಿರುವ ದೀಪಗಳು ಮತ್ತು ತಲೆಯ ಮೇಲೆ ಅದ್ಭುತ ಒಡಿಗೆ.",
   "imageDescriptionTajMahal": "ಡೆನಿಮ್ ಜಾಕೆಟ್‌ಗಳನ್ನು ಧರಿಸಿದ ಯುವ ಸ್ನೇಹಿತರ ಗುಂಪು ಛಾವಣಿಯ ಮೇಲೆ ನಿಂತಿದೆ, ಕಾಫಿ ಹಿಡಿದುಕೊಂಡು ಹಿಂದೆ ತಾಜ್ ಮಹಲ್‌ನೊಂದಿಗೆ ನಗುತ್ತಿದೆ.",
   "imageDescriptionVillageScene": "ಒಬ್ಬ ಮುದಿಯ ರೈತ ಚಿನ್ನದ ಸೂರ್ಯಾಸ್ತದ ಸಮಯದಲ್ಲಿ ಎರಡು ಬಿಳಿ ಎತ್ತುಗಳಿಂದ ಎಳೆಯಲ್ಪಡುವ ಮರದ ಬುಲಾಕ್ ಕಾರ್ಟ್ ಮೇಲೆ ಕುಳಿತು ದೊಡ್ಡ ಬೆಳೆ ಸಾಗಿಸುತ್ತಿದ್ದಾನೆ.",
-  "imageDescriptionWomenDiwaliCelebration": "ಗುಲಾಬಿ ಸಾಂಪ್ರದಾಯಿಕ ಬಟ್ಟೆಯಲ್ಲಿ ಒಬ್ಬ ಮಹಿಳೆ ಪ್ರಕಾಶಮಾನವಾದ ಎಣ್ಣೆ ದೀಪಗಳಿಂದ ಸುತ್ತುವರಿಯಲ್ಪಟ್ಟ ನೆಲದ ಮೇಲೆ ಸುಂದರ ಬಣ್ಣದ ರಂಗೋಲಿ ರಚಿಸುತ್ತಿದ್ದಾಳೆ."
+  "imageDescriptionWomenDiwaliCelebration": "ಗುಲಾಬಿ ಸಾಂಪ್ರದಾಯಿಕ ಬಟ್ಟೆಯಲ್ಲಿ ಒಬ್ಬ ಮಹಿಳೆ ಪ್ರಕಾಶಮಾನವಾದ ಎಣ್ಣೆ ದೀಪಗಳಿಂದ ಸುತ್ತುವರಿಯಲ್ಪಟ್ಟ ನೆಲದ ಮೇಲೆ ಸುಂದರ ಬಣ್ಣದ ರಂಗೋಲಿ ರಚಿಸುತ್ತಿದ್ದಾಳೆ.",
+  "voiceConversationStartHint": "Say \"Hey, Fin\" \nto start conversation",
+  "voiceConversationListeningHint": "Listening… tap mic to stop",
+  "voiceSessionConnecting": "Connecting…",
+  "voiceSessionReady": "Ready — ask Fin anything",
+  "voiceSessionListening": "Listening… speak anytime",
+  "voiceSessionHearingYou": "Hearing you…",
+  "voiceSessionUnderstanding": "Understanding…",
+  "voiceSessionThinking": "Thinking…",
+  "voiceSessionPreparingReply": "Preparing reply…",
+  "voiceSessionFinSpeaking": "Fin is speaking…",
+  "voiceSessionLiveYou": "You",
+  "voiceSessionLiveAssistant": "Fin",
+  "voiceSessionMicMuted": "Mic is muted",
+  "voiceMicMuteLabel": "Mute mic",
+  "voiceMicUnmuteLabel": "Unmute mic"
 }

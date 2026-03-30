@@ -103,5 +103,20 @@
   "imageDescriptionPeopleDiwaliCelebration": "মানুষ ঐতিহ্যবাহী পোশাকে সজ্জিত রাস্তায় দীপাবলি উদযাপন করছে, জীবন্ত লণ্ঠন, জ্বলন্ত দীপ ও মাথার উপরে মনোরম আতশবাজি।",
   "imageDescriptionTajMahal": "ডেনিম জ্যাকেট পরা যুব বন্ধুদের দল ছাদে দাঁড়িয়ে কফি ধরে পেছনে তাজমহল নিয়ে হেসে।",
   "imageDescriptionVillageScene": "এক বয়স্ক কৃষক সোনালি সূর্যাস্তের সময় দুটি সাদা বলদ দ্বারা টানা কাঠের গরুর গাড়ির ওপর বসে বড় ফসল নিয়ে যাচ্ছেন।",
-  "imageDescriptionWomenDiwaliCelebration": "গোলাপী ঐতিহ্যবাহী পোশাকে একজন মহিলা জ্বলন্ত তেলের দীপ দিয়ে ঘেরা মাটিতে সুন্দর রঙিন রঙ্গলি তৈরি করছেন।"
+  "imageDescriptionWomenDiwaliCelebration": "গোলাপী ঐতিহ্যবাহী পোশাকে একজন মহিলা জ্বলন্ত তেলের দীপ দিয়ে ঘেরা মাটিতে সুন্দর রঙিন রঙ্গলি তৈরি করছেন।",
+  "voiceConversationStartHint": "Say \"Hey, Fin\" \nto start conversation",
+  "voiceConversationListeningHint": "Listening… tap mic to stop",
+  "voiceSessionConnecting": "Connecting…",
+  "voiceSessionReady": "Ready — ask Fin anything",
+  "voiceSessionListening": "Listening… speak anytime",
+  "voiceSessionHearingYou": "Hearing you…",
+  "voiceSessionUnderstanding": "Understanding…",
+  "voiceSessionThinking": "Thinking…",
+  "voiceSessionPreparingReply": "Preparing reply…",
+  "voiceSessionFinSpeaking": "Fin is speaking…",
+  "voiceSessionLiveYou": "You",
+  "voiceSessionLiveAssistant": "Fin",
+  "voiceSessionMicMuted": "Mic is muted",
+  "voiceMicMuteLabel": "Mute mic",
+  "voiceMicUnmuteLabel": "Unmute mic"
 }

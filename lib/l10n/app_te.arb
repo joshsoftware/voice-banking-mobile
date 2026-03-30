@@ -103,5 +103,20 @@
   "imageDescriptionPeopleDiwaliCelebration": "ప్రజలు సంప్రదాయ వేషంలో అలంకరించిన వీధిలో దీపావళి జరుపుకుంటున్నారు, జీవంతమైన లాంటర్లు, ప్రకాశమానమైన దీపాల మరియు తల మీద అద్భుతమైన అగ్నిపర్వత ప్రదర్శనతో.",
   "imageDescriptionTajMahal": "డెనిం జాకెట్లు ధరించిన యువ స్నేహితుల గ్రూప్ రూఫ్‌టాప్‌లో నిలబడి కాఫీ పట్టుకొని తాజ్ మహల్ వెనుక ఉండి చిరునవ్వుతున్నారు.",
   "imageDescriptionVillageScene": "ఒక వృద్ధ రైతు బంగారు సూర్యాస్తమయ సమయంలో రెండు తెల్ల ఎద్దులచే లాగబడే చెక్క బుల్లాక్ కార్ట్ మీద కూర్చుని పెద్ద పంటను మోసుకువెళ్తున్నాడు.",
-  "imageDescriptionWomenDiwaliCelebration": "గులాబీ సంప్రదాయ వస్త్రాలలో ఉన్న ఒక మహిళ ప్రకాశమానమైన నూనె దీపాలతో చుట్టుకొని ఉన్న నేలపై అందమైన రంగుల రంగోలి సృష్టిస్తోంది."
+  "imageDescriptionWomenDiwaliCelebration": "గులాబీ సంప్రదాయ వస్త్రాలలో ఉన్న ఒక మహిళ ప్రకాశమానమైన నూనె దీపాలతో చుట్టుకొని ఉన్న నేలపై అందమైన రంగుల రంగోలి సృష్టిస్తోంది.",
+  "voiceConversationStartHint": "Say \"Hey, Fin\" \nto start conversation",
+  "voiceConversationListeningHint": "Listening… tap mic to stop",
+  "voiceSessionConnecting": "Connecting…",
+  "voiceSessionReady": "Ready — ask Fin anything",
+  "voiceSessionListening": "Listening… speak anytime",
+  "voiceSessionHearingYou": "Hearing you…",
+  "voiceSessionUnderstanding": "Understanding…",
+  "voiceSessionThinking": "Thinking…",
+  "voiceSessionPreparingReply": "Preparing reply…",
+  "voiceSessionFinSpeaking": "Fin is speaking…",
+  "voiceSessionLiveYou": "You",
+  "voiceSessionLiveAssistant": "Fin",
+  "voiceSessionMicMuted": "Mic is muted",
+  "voiceMicMuteLabel": "Mute mic",
+  "voiceMicUnmuteLabel": "Unmute mic"
 }
