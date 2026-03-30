@@ -1,5 +1,20 @@
-# Uncomment this line to define a global platform for your project
-# platform :ios, '13.0'
+# Pipecat SmallWebRTC transport requires iOS 16.0+ for WebRTC + AVAudioSession APIs
+platform :ios, '16.0'
+
+# ┌──────────────────────────────────────────────────────────────────────────┐
+# │  PIPECAT iOS SDK — Swift Package Manager (SPM)                          │
+# │                                                                         │
+# │  PipecatClientIOS / SmallWebRTC transport are SPM-only packages.        │
+# │  Add them in Xcode → Runner.xcworkspace → Project → Package Deps:      │
+# │                                                                         │
+# │  1. https://github.com/pipecat-ai/pipecat-client-ios.git               │
+# │     >= 1.0.0  (core SDK: PipecatClientIOS)                             │
+# │  2. https://github.com/pipecat-ai/pipecat-client-ios-small-webrtc.git  │
+# │     >= 1.2.0  (transport: PipecatClientIOSSmallWebrtc)                  │
+# │                                                                         │
+# │  Then add both to Runner target → "Frameworks, Libraries,              │
+# │  and Embedded Content".                                                 │
+# └──────────────────────────────────────────────────────────────────────────┘
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
