@@ -741,8 +741,14 @@ abstract class AppLocalizations {
   /// No description provided for @voiceConversationStartHint.
   ///
   /// In en, this message translates to:
-  /// **'Say \"Hey, Fin\" \nto start conversation'**
+  /// **'Click to start conversation'**
   String get voiceConversationStartHint;
+
+  /// No description provided for @voiceChatEmptyPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Your conversation will appear here.'**
+  String get voiceChatEmptyPlaceholder;
 
   /// No description provided for @voiceConversationListeningHint.
   ///
@@ -759,7 +765,7 @@ abstract class AppLocalizations {
   /// No description provided for @voiceSessionReady.
   ///
   /// In en, this message translates to:
-  /// **'Ready — ask Fin anything'**
+  /// **'Ready — ask anything'**
   String get voiceSessionReady;
 
   /// No description provided for @voiceSessionListening.

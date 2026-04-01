@@ -373,8 +373,10 @@ class AppLocalizationsKn extends AppLocalizations {
       'ಗುಲಾಬಿ ಸಾಂಪ್ರದಾಯಿಕ ಬಟ್ಟೆಯಲ್ಲಿ ಒಬ್ಬ ಮಹಿಳೆ ಪ್ರಕಾಶಮಾನವಾದ ಎಣ್ಣೆ ದೀಪಗಳಿಂದ ಸುತ್ತುವರಿಯಲ್ಪಟ್ಟ ನೆಲದ ಮೇಲೆ ಸುಂದರ ಬಣ್ಣದ ರಂಗೋಲಿ ರಚಿಸುತ್ತಿದ್ದಾಳೆ.';
 
   @override
-  String get voiceConversationStartHint =>
-      'Say \"Hey, Fin\" \nto start conversation';
+  String get voiceConversationStartHint => 'Click to start conversation';
+
+  @override
+  String get voiceChatEmptyPlaceholder => 'Your conversation will appear here.';
 
   @override
   String get voiceConversationListeningHint => 'Listening… tap mic to stop';
@@ -383,7 +385,7 @@ class AppLocalizationsKn extends AppLocalizations {
   String get voiceSessionConnecting => 'Connecting…';
 
   @override
-  String get voiceSessionReady => 'Ready — ask Fin anything';
+  String get voiceSessionReady => 'Ready — ask anything';
 
   @override
   String get voiceSessionListening => 'Listening… speak anytime';

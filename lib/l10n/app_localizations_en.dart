@@ -371,8 +371,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'A woman in pink traditional clothing carefully creates a beautiful, colorful rangoli on the ground surrounded by glowing oil lamps.';
 
   @override
-  String get voiceConversationStartHint =>
-      'Say \"Hey, Fin\" \nto start conversation';
+  String get voiceConversationStartHint => 'Click to start conversation';
+
+  @override
+  String get voiceChatEmptyPlaceholder => 'Your conversation will appear here.';
 
   @override
   String get voiceConversationListeningHint => 'Listening… tap mic to stop';
@@ -381,7 +383,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get voiceSessionConnecting => 'Connecting…';
 
   @override
-  String get voiceSessionReady => 'Ready — ask Fin anything';
+  String get voiceSessionReady => 'Ready — ask anything';
 
   @override
   String get voiceSessionListening => 'Listening… speak anytime';

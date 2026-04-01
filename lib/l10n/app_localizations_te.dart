@@ -374,8 +374,10 @@ class AppLocalizationsTe extends AppLocalizations {
       'గులాబీ సంప్రదాయ వస్త్రాలలో ఉన్న ఒక మహిళ ప్రకాశమానమైన నూనె దీపాలతో చుట్టుకొని ఉన్న నేలపై అందమైన రంగుల రంగోలి సృష్టిస్తోంది.';
 
   @override
-  String get voiceConversationStartHint =>
-      'Say \"Hey, Fin\" \nto start conversation';
+  String get voiceConversationStartHint => 'Click to start conversation';
+
+  @override
+  String get voiceChatEmptyPlaceholder => 'Your conversation will appear here.';
 
   @override
   String get voiceConversationListeningHint => 'Listening… tap mic to stop';
@@ -384,7 +386,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get voiceSessionConnecting => 'Connecting…';
 
   @override
-  String get voiceSessionReady => 'Ready — ask Fin anything';
+  String get voiceSessionReady => 'Ready — ask anything';
 
   @override
   String get voiceSessionListening => 'Listening… speak anytime';
