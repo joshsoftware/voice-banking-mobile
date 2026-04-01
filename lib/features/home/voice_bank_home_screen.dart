@@ -59,36 +59,6 @@ String _voicePrimaryStatusLine(
   }
 }
 
-String? _voiceSecondaryCaption({
-  required bool sessionActive,
-  required bool userSpeaking,
-  required BotProcessingState botState,
-  required String userT,
-  required String botT,
-  required String llm,
-}) {
-  if (!sessionActive) return null;
-  if (userSpeaking && userT.isNotEmpty) return userT;
-  if (botState == BotProcessingState.speaking ||
-      botState == BotProcessingState.ttsSynthesizing ||
-      botState == BotProcessingState.ttsDone) {
-    if (botT.isNotEmpty) return botT;
-    if (llm.isNotEmpty) return llm;
-  }
-  if (botState == BotProcessingState.llmProcessing && llm.isNotEmpty) {
-    return llm;
-  }
-  if (userT.isNotEmpty) return userT;
-  return null;
-}
-
-String _truncateCaption(String s, {int max = 140}) {
-  final t = s.trim();
-  if (t.isEmpty) return '';
-  if (t.length <= max) return t;
-  return '${t.substring(0, max)}…';
-}
-
 class _HomeColors {
   static const gradientStart = Color(0xFF2072B2);
   static const gradientMid = Color(0xFF18405F);
@@ -465,18 +435,33 @@ class _VoiceBottomSheetContentState extends ConsumerState<_VoiceBottomSheetConte
   static const _tag = 'Pipecat/HomeUI';
 
   late final AnimationController _bars;
+  late final ScrollController _chatScroll;
+
+  void _maybeScrollChatToEnd() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_chatScroll.hasClients) return;
+      final p = _chatScroll.position;
+      const threshold = 120.0;
+      final nearBottom = p.maxScrollExtent - p.pixels <= threshold;
+      if (nearBottom) {
+        _chatScroll.jumpTo(p.maxScrollExtent);
+      }
+    });
+  }
 
   @override
   void initState() {
     super.initState();
+    _chatScroll = ScrollController();
     _bars = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
-    )..repeat();
+    );
   }
 
   @override
   void dispose() {
+    _chatScroll.dispose();
     _bars.dispose();
     super.dispose();
   }
@@ -502,6 +487,12 @@ class _VoiceBottomSheetContentState extends ConsumerState<_VoiceBottomSheetConte
           'session busy changed: ${previous?.isBusy} -> ${next.isBusy}',
         );
       }
+      final runWaveform = next.isActive && !next.isBusy;
+      if (runWaveform) {
+        if (!_bars.isAnimating) _bars.repeat();
+      } else {
+        _bars.stop();
+      }
     });
 
     final session = ref.watch(voiceSessionProvider);
@@ -515,6 +506,7 @@ class _VoiceBottomSheetContentState extends ConsumerState<_VoiceBottomSheetConte
       pipecat.botState,
       pipecat.userSpeaking,
       pipecat.llmBuffer,
+      pipecat.sessionChatMessages,
     ]);
 
     return Container(
@@ -535,15 +527,17 @@ class _VoiceBottomSheetContentState extends ConsumerState<_VoiceBottomSheetConte
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 6),
           child: ListenableBuilder(
             listenable: merged,
             builder: (context, _) {
               final userSpeaking = pipecat.userSpeaking.value;
               final botState = pipecat.botState.value;
-              final userT = pipecat.userTranscript.value;
-              final botT = pipecat.botTranscript.value;
-              final llm = pipecat.llmBuffer.value;
+              final userT = pipecat.userTranscript.value.trim();
+              final llm = pipecat.llmBuffer.value.trim();
+              final chat = pipecat.sessionChatMessages.value;
+
+              _maybeScrollChatToEnd();
 
               final primary = _voicePrimaryStatusLine(
                 l10n,
@@ -552,17 +546,12 @@ class _VoiceBottomSheetContentState extends ConsumerState<_VoiceBottomSheetConte
                 userSpeaking,
                 micMuted,
               );
-              final secondary = _voiceSecondaryCaption(
-                sessionActive: session.isActive,
-                userSpeaking: userSpeaking,
-                botState: botState,
-                userT: userT,
-                botT: botT,
-                llm: llm,
-              );
 
               final botTalking = botState == BotProcessingState.speaking ||
                   botState == BotProcessingState.ttsSynthesizing;
+              final hasChatContent = chat.isNotEmpty ||
+                  userT.isNotEmpty ||
+                  llm.isNotEmpty;
               final barIntensity = !session.isActive && !session.isBusy
                   ? 0.0
                   : session.isBusy
@@ -572,6 +561,8 @@ class _VoiceBottomSheetContentState extends ConsumerState<_VoiceBottomSheetConte
                           : botTalking
                               ? 0.82
                               : 0.32;
+
+              final showWaveform = session.isActive && !session.isBusy;
 
               return Column(
                 children: [
@@ -583,116 +574,60 @@ class _VoiceBottomSheetContentState extends ConsumerState<_VoiceBottomSheetConte
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  if (session.isActive || session.isBusy)
-                    _VoiceSessionWaveform(
-                      animation: _bars,
-                      intensity: barIntensity,
-                      activeColor: _HomeColors.linkBlue,
-                    ),
-                  const SizedBox(height: 16),
-                  _MicPillButton(
-                    isBusy: session.isBusy,
-                    isActive: session.isActive,
-                    onTap: () => ref
-                        .read(voiceSessionProvider.notifier)
-                        .toggleMicSession(),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: hasChatContent
+                        ? _VoiceSessionChatList(
+                            scrollController: _chatScroll,
+                            messages: chat,
+                            liveUserText: userT.isNotEmpty ? userT : null,
+                            liveAssistantText: llm.isNotEmpty ? llm : null,
+                            labelUser: l10n.voiceSessionLiveYou,
+                            labelAssistant: l10n.voiceSessionLiveAssistant,
+                            userSpeaking: userSpeaking,
+                            assistantLiveActive: botTalking ||
+                                botState == BotProcessingState.llmProcessing,
+                          )
+                        : _VoiceChatEmptyPlaceholder(
+                            message: l10n.voiceChatEmptyPlaceholder,
+                          ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (showWaveform) ...[
+                          _VoiceSessionWaveform(
+                            animation: _bars,
+                            intensity: barIntensity,
+                            activeColor: _HomeColors.linkBlue,
+                            compact: true,
+                          ),
+                          const SizedBox(height: 10),
+                        ],
+                        _MicPillButton(
+                          isBusy: session.isBusy,
+                          isActive: session.isActive,
+                          compact: true,
+                          onTap: () => ref
+                              .read(voiceSessionProvider.notifier)
+                              .toggleMicSession(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   Text(
                     primary,
                     textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 18,
+                      fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: _HomeColors.sectionTitle,
-                      height: 28 / 18,
-                    ),
-                  ),
-                  if (session.isActive) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      l10n.voiceConversationListeningHint,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                        color: _HomeColors.sectionTitle.withValues(alpha: 0.55),
-                        height: 18 / 13,
-                      ),
-                    ),
-                  ],
-                  if (secondary != null && secondary.trim().isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    _VoiceLiveCaptionCard(
-                      labelUser: l10n.voiceSessionLiveYou,
-                      labelAssistant: l10n.voiceSessionLiveAssistant,
-                      userSpeaking: userSpeaking,
-                      botTalking: botTalking ||
-                          botState == BotProcessingState.llmProcessing,
-                      text: _truncateCaption(secondary),
-                    ),
-                  ],
-                  const Spacer(),
-                  Opacity(
-                    opacity: session.isActive && !session.isBusy ? 1 : 0.4,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          micMuted
-                              ? l10n.voiceMicUnmuteLabel
-                              : l10n.voiceMicMuteLabel,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: _HomeColors.sectionTitle.withValues(alpha: 0.5),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: session.isActive && !session.isBusy
-                                ? () {
-                                    final nextMuted =
-                                        !ref.read(voiceMicMutedProvider);
-                                    ref
-                                        .read(voiceMicMutedProvider.notifier)
-                                        .state = nextMuted;
-                                    ref
-                                        .read(pipecatControllerProvider)
-                                        .enableMic(!nextMuted);
-                                  }
-                                : null,
-                            customBorder: const CircleBorder(),
-                            child: Ink(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                color: micMuted
-                                    ? _HomeColors.linkBlue.withValues(alpha: 0.12)
-                                    : const Color(0xFFF5F7FA),
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.08),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 6),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                micMuted ? Icons.mic_off_rounded : Icons.mic_none_rounded,
-                                size: 22,
-                                color: micMuted
-                                    ? _HomeColors.linkBlue
-                                    : _HomeColors.sectionTitle.withValues(alpha: 0.75),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                      height: 20 / 15,
                     ),
                   ),
                 ],
@@ -705,16 +640,215 @@ class _VoiceBottomSheetContentState extends ConsumerState<_VoiceBottomSheetConte
   }
 }
 
+class _VoiceChatEmptyPlaceholder extends StatelessWidget {
+  const _VoiceChatEmptyPlaceholder({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.forum_outlined,
+              size: 44,
+              color: _HomeColors.sectionTitle.withValues(alpha: 0.26),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.4,
+                fontWeight: FontWeight.w500,
+                color: _HomeColors.sectionTitle.withValues(alpha: 0.58),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _VoiceSessionChatList extends StatelessWidget {
+  const _VoiceSessionChatList({
+    required this.scrollController,
+    required this.messages,
+    this.liveUserText,
+    this.liveAssistantText,
+    required this.labelUser,
+    required this.labelAssistant,
+    required this.userSpeaking,
+    required this.assistantLiveActive,
+  });
+
+  final ScrollController scrollController;
+  final List<VoiceChatMessage> messages;
+  final String? liveUserText;
+  final String? liveAssistantText;
+  final String labelUser;
+  final String labelAssistant;
+  final bool userSpeaking;
+  final bool assistantLiveActive;
+
+  @override
+  Widget build(BuildContext context) {
+    final trailing = <({bool isUser, String text})>[];
+    if (liveUserText != null && liveUserText!.isNotEmpty) {
+      trailing.add((isUser: true, text: liveUserText!));
+    }
+    if (liveAssistantText != null && liveAssistantText!.isNotEmpty) {
+      trailing.add((isUser: false, text: liveAssistantText!));
+    }
+
+    return ListView.builder(
+      controller: scrollController,
+      padding: const EdgeInsets.only(bottom: 4),
+      itemCount: messages.length + trailing.length,
+      itemBuilder: (context, index) {
+        if (index < messages.length) {
+          final m = messages[index];
+          return _VoiceChatBubble(
+            label: m.isUser ? labelUser : labelAssistant,
+            text: m.text,
+            isUser: m.isUser,
+            isLive: false,
+            highlightUser: false,
+            highlightAssistant: false,
+          );
+        }
+        final t = trailing[index - messages.length];
+        return _VoiceChatBubble(
+          label: t.isUser ? labelUser : labelAssistant,
+          text: t.text,
+          isUser: t.isUser,
+          isLive: true,
+          highlightUser: t.isUser && userSpeaking,
+          highlightAssistant: !t.isUser && assistantLiveActive,
+        );
+      },
+    );
+  }
+}
+
+class _VoiceChatBubble extends StatelessWidget {
+  const _VoiceChatBubble({
+    required this.label,
+    required this.text,
+    required this.isUser,
+    required this.isLive,
+    required this.highlightUser,
+    required this.highlightAssistant,
+  });
+
+  final String label;
+  final String text;
+  final bool isUser;
+  final bool isLive;
+  final bool highlightUser;
+  final bool highlightAssistant;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxW = MediaQuery.sizeOf(context).width * 0.82;
+    final accent = isUser
+        ? (highlightUser
+            ? _HomeColors.linkBlue
+            : _HomeColors.linkBlue.withValues(alpha: 0.72))
+        : (highlightAssistant
+            ? const Color(0xFF2E8B57)
+            : _HomeColors.sectionTitle.withValues(alpha: 0.45));
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Align(
+        alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxW),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: isUser
+                  ? _HomeColors.linkBlue.withValues(alpha: 0.09)
+                  : const Color(0xFFF4F9FF),
+              borderRadius: BorderRadius.only(
+                topLeft: const Radius.circular(14),
+                topRight: const Radius.circular(14),
+                bottomLeft: Radius.circular(isUser ? 14 : 3),
+                bottomRight: Radius.circular(isUser ? 3 : 14),
+              ),
+              border: Border.all(
+                color: accent.withValues(alpha: isLive ? 0.28 : 0.38),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 5,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: accent,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        label.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                          color: accent,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: 14,
+                      height: 1.38,
+                      fontWeight: FontWeight.w500,
+                      fontStyle:
+                          isLive && !isUser ? FontStyle.italic : FontStyle.normal,
+                      color: _HomeColors.sectionTitle.withValues(alpha: 0.92),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _VoiceSessionWaveform extends StatelessWidget {
   const _VoiceSessionWaveform({
     required this.animation,
     required this.intensity,
     required this.activeColor,
+    this.compact = false,
   });
 
   final Animation<double> animation;
   final double intensity;
   final Color activeColor;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -723,8 +857,10 @@ class _VoiceSessionWaveform extends StatelessWidget {
       builder: (context, child) {
         final t = animation.value * 2 * math.pi;
         const n = 5;
-        const maxH = 36.0;
-        const minH = 6.0;
+        final maxH = compact ? 22.0 : 36.0;
+        final minH = compact ? 4.0 : 6.0;
+        final barW = compact ? 4.0 : 5.0;
+        final barPad = compact ? 2.0 : 3.0;
         // Fixed slot height so bar animation does not shift layout below.
         return SizedBox(
           height: maxH,
@@ -739,9 +875,9 @@ class _VoiceSessionWaveform extends StatelessWidget {
                 final wave = 0.5 + 0.5 * math.sin(phase);
                 final h = minH + (maxH - minH) * wave * intensity;
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 3),
+                  padding: EdgeInsets.symmetric(horizontal: barPad),
                   child: Container(
-                    width: 5,
+                    width: barW,
                     height: h,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(3),
@@ -765,89 +901,6 @@ class _VoiceSessionWaveform extends StatelessWidget {
   }
 }
 
-class _VoiceLiveCaptionCard extends StatelessWidget {
-  const _VoiceLiveCaptionCard({
-    required this.labelUser,
-    required this.labelAssistant,
-    required this.userSpeaking,
-    required this.botTalking,
-    required this.text,
-  });
-
-  final String labelUser;
-  final String labelAssistant;
-  final bool userSpeaking;
-  final bool botTalking;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = userSpeaking
-        ? _HomeColors.linkBlue
-        : botTalking
-            ? const Color(0xFF2E8B57)
-            : _HomeColors.sectionTitle.withValues(alpha: 0.45);
-    final label = userSpeaking
-        ? labelUser
-        : botTalking
-            ? labelAssistant
-            : labelAssistant;
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOut,
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF4F9FF),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: accent.withValues(alpha: 0.35),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 6,
-                height: 6,
-                decoration: BoxDecoration(
-                  color: accent,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.6,
-                  color: accent,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            text,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.35,
-              fontWeight: FontWeight.w500,
-              color: _HomeColors.sectionTitle.withValues(alpha: 0.92),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 // ---------------------------------------------------------------------------
 // Figma 114:1730 — Mic pill button inside voice sheet
 // ---------------------------------------------------------------------------
@@ -856,11 +909,13 @@ class _MicPillButton extends StatelessWidget {
     required this.isBusy,
     required this.isActive,
     required this.onTap,
+    this.compact = false,
   });
 
   final bool isBusy;
   final bool isActive;
   final VoidCallback onTap;
+  final bool compact;
 
   static const _greenActive = Color(0xFF2E8B57);
   static const _greenActiveDeep = Color(0xFF1B5E3A);
@@ -868,6 +923,12 @@ class _MicPillButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ringAlpha = isActive && !isBusy ? 0.16 : 0.08;
+    final w = compact ? 148.0 : 207.0;
+    final h = compact ? 56.0 : 82.0;
+    final outerR = compact ? 36.0 : 52.0;
+    final pad = compact ? 4.0 : 5.0;
+    final iconSz = compact ? 24.0 : 30.0;
+    final progSz = compact ? 22.0 : 28.0;
 
     return Opacity(
       opacity: isBusy ? 0.65 : 1,
@@ -875,16 +936,16 @@ class _MicPillButton extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: isBusy ? null : onTap,
-          borderRadius: BorderRadius.circular(52),
+          borderRadius: BorderRadius.circular(outerR),
           splashColor: Colors.white.withValues(alpha: 0.2),
           highlightColor: Colors.white.withValues(alpha: 0.08),
           child: Ink(
-            width: 207,
-            height: 82,
-            padding: const EdgeInsets.all(5),
+            width: w,
+            height: h,
+            padding: EdgeInsets.all(pad),
             decoration: BoxDecoration(
               color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(52),
+              borderRadius: BorderRadius.circular(outerR),
               border: Border.all(
                 width: 1,
                 color: _HomeColors.linkBlue.withValues(alpha: ringAlpha),
@@ -904,7 +965,7 @@ class _MicPillButton extends StatelessWidget {
             ),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(9999),
+                borderRadius: BorderRadius.circular(outerR - pad),
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -932,17 +993,17 @@ class _MicPillButton extends StatelessWidget {
               ),
               child: Center(
                 child: isBusy
-                    ? const SizedBox(
-                        width: 28,
-                        height: 28,
+                    ? SizedBox(
+                        width: progSz,
+                        height: progSz,
                         child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
+                          strokeWidth: compact ? 2 : 2.5,
                           color: Colors.white,
                         ),
                       )
                     : Icon(
                         isActive ? Icons.stop_rounded : Icons.mic_rounded,
-                        size: 30,
+                        size: iconSz,
                         color: Colors.white,
                       ),
               ),

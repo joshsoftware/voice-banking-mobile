@@ -42,12 +42,16 @@ final voiceSessionProvider =
 /// Mic input muted for the current session (native `enableMic(false)`).
 final voiceMicMutedProvider = StateProvider<bool>((ref) => false);
 
-void _resetPipecatVoiceUiBuffers(PipecatController c) {
+void _resetPipecatLiveVoiceUi(PipecatController c) {
   c.userTranscript.value = '';
   c.botTranscript.value = '';
   c.llmBuffer.value = '';
   c.botState.value = BotProcessingState.silent;
   c.userSpeaking.value = false;
+}
+
+void _clearPipecatSessionChat(PipecatController c) {
+  c.clearSessionChat();
 }
 
 class VoiceSessionNotifier extends AutoDisposeNotifier<VoiceSessionState> {
@@ -73,7 +77,7 @@ class VoiceSessionNotifier extends AutoDisposeNotifier<VoiceSessionState> {
         await controller.stop();
         AppLogger.i(_tag, 'stop(): success');
         ref.read(voiceMicMutedProvider.notifier).state = false;
-        _resetPipecatVoiceUiBuffers(controller);
+        _resetPipecatLiveVoiceUi(controller);
         state = state.copyWith(isActive: false, isBusy: false);
       } catch (e, st) {
         AppLogger.e(_tag, 'stop(): failure', error: e, stack: st);
@@ -85,7 +89,8 @@ class VoiceSessionNotifier extends AutoDisposeNotifier<VoiceSessionState> {
     AppLogger.i(_tag, 'toggleMicSession(): start requested');
     state = state.copyWith(isBusy: true, clearError: true);
     ref.read(voiceMicMutedProvider.notifier).state = false;
-    _resetPipecatVoiceUiBuffers(controller);
+    _resetPipecatLiveVoiceUi(controller);
+    _clearPipecatSessionChat(controller);
     try {
       final headersJson = AppConfig.pipecatRequestHeadersJson.trim().isEmpty
           ? null

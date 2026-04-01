@@ -14,6 +14,18 @@ import 'package:voice_banking_mobile/core/pipecat/generated/pipecat_api.g.dart';
 import 'package:voice_banking_mobile/core/pipecat/pipecat_events.dart';
 
 // ---------------------------------------------------------------------------
+// Session chat (committed turns during a voice session)
+// ---------------------------------------------------------------------------
+
+/// One line in the in-session voice transcript (user STT or assistant reply).
+final class VoiceChatMessage {
+  const VoiceChatMessage({required this.isUser, required this.text});
+
+  final bool isUser;
+  final String text;
+}
+
+// ---------------------------------------------------------------------------
 // Controller
 // ---------------------------------------------------------------------------
 
@@ -24,6 +36,14 @@ class PipecatController {
   static const _tag = 'Pipecat/Controller';
 
   final PipecatHostApi _host;
+
+  /// True when the next user final should append a new bubble (vs coalescing
+  /// into the last user bubble). Set from [VadEvent] boundaries; see
+  /// SmallWebRTC prebuilt UI transcript behavior (one line per utterance).
+  bool _nextUserFinalStartsNewBubble = false;
+
+  /// True after [VadEvent] `userStoppedSpeaking` until a new utterance opens.
+  bool _userClosedUtterance = false;
 
   StreamSubscription<PipecatEventData>? _subscription;
   final StreamController<PipecatEvent> _controller =
@@ -49,6 +69,17 @@ class PipecatController {
 
   /// Accumulator for streaming LLM tokens.
   final ValueNotifier<String> llmBuffer = ValueNotifier<String>('');
+
+  /// Committed user / assistant messages for the current session (scrollable chat).
+  final ValueNotifier<List<VoiceChatMessage>> sessionChatMessages =
+      ValueNotifier<List<VoiceChatMessage>>(<VoiceChatMessage>[]);
+
+  /// Clears [sessionChatMessages] and user-turn coalescing state (e.g. new mic session).
+  void clearSessionChat() {
+    sessionChatMessages.value = <VoiceChatMessage>[];
+    _nextUserFinalStartsNewBubble = false;
+    _userClosedUtterance = false;
+  }
 
   // -- Commands ------------------------------------------------------------
 
@@ -116,11 +147,37 @@ class PipecatController {
     switch (event) {
       case TranscriptEvent(:final text, :final isBot, :final isFinal):
         if (isBot) {
-          botTranscript.value = text;
+          final trimmed = text.trim();
+          if (trimmed.isNotEmpty) {
+            sessionChatMessages.value = [
+              ...sessionChatMessages.value,
+              VoiceChatMessage(isUser: false, text: trimmed),
+            ];
+          }
+          botTranscript.value = '';
+          llmBuffer.value = '';
         } else {
           userTranscript.value = text;
           if (isFinal) {
             llmBuffer.value = '';
+            final trimmed = text.trim();
+            if (trimmed.isNotEmpty) {
+              final prev = sessionChatMessages.value;
+              final list = List<VoiceChatMessage>.from(prev);
+              final last = list.isEmpty ? null : list.last;
+              final startNew = _nextUserFinalStartsNewBubble ||
+                  last == null ||
+                  !last.isUser;
+              if (startNew) {
+                list.add(VoiceChatMessage(isUser: true, text: trimmed));
+              } else {
+                list[list.length - 1] =
+                    VoiceChatMessage(isUser: true, text: trimmed);
+              }
+              _nextUserFinalStartsNewBubble = false;
+              sessionChatMessages.value = list;
+            }
+            userTranscript.value = '';
           }
         }
 
@@ -132,6 +189,16 @@ class PipecatController {
 
       case VadEvent(:final isSpeaking):
         userSpeaking.value = isSpeaking;
+        if (!isSpeaking) {
+          _userClosedUtterance = true;
+        } else {
+          final list = sessionChatMessages.value;
+          final last = list.isEmpty ? null : list.last;
+          if (last == null || !last.isUser || _userClosedUtterance) {
+            _nextUserFinalStartsNewBubble = true;
+            _userClosedUtterance = false;
+          }
+        }
 
       case TransportStateEvent():
         break;
@@ -154,6 +221,7 @@ class PipecatController {
     botState.dispose();
     userSpeaking.dispose();
     llmBuffer.dispose();
+    sessionChatMessages.dispose();
   }
 }
 
