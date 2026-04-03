@@ -53,7 +53,7 @@
   "tapToStop": "थांबवण्यासाठी टॅप करा",
   "setUpVoiceByDescribing": "प्रतिमेचे वर्णन करून वॉइस सेट करा ",
   "describingTheImage": "प्रतिमा वर्णन करा.",
-  "takesUnder30Seconds": "30 सेकंदांत पूर्ण होते.",
+  "takesUnder15Seconds": "15 सेकंदांत पूर्ण होते.",
   "tapToStartSpeaking": "बोलणे सुरू करण्यासाठी टॅप करा",
   "recordingPercent": "रेकॉर्डिंग... {percent}%",
   "reRecord": "पुन्हा रेकॉर्ड करा",

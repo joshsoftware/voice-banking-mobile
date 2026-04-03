@@ -53,7 +53,7 @@
   "tapToStop": "Tap to stop",
   "setUpVoiceByDescribing": "Set up your voice by ",
   "describingTheImage": "describing the image.",
-  "takesUnder30Seconds": "Takes under 30 seconds.",
+  "takesUnder15Seconds": "Takes under 15 seconds.",
   "tapToStartSpeaking": "Tap to start speaking",
   "recordingPercent": "Recording...{percent}%",
   "reRecord": "Re-record",

@@ -53,7 +53,7 @@
   "tapToStop": "বন্ধ করতে ট্যাপ করুন",
   "setUpVoiceByDescribing": "ছবির বর্ণনা দিয়ে ভয়েস সেটআপ করুন ",
   "describingTheImage": "ছবিটি বর্ণনা করুন।",
-  "takesUnder30Seconds": "৩০ সেকেন্ডের কম সময় লাগে।",
+  "takesUnder15Seconds": "১৫ সেকেন্ডের কম সময় লাগে।",
   "tapToStartSpeaking": "বলতে শুরু করতে ট্যাপ করুন",
   "recordingPercent": "রেকর্ডিং... {percent}%",
   "reRecord": "পুনরায় রেকর্ড করুন",

@@ -53,7 +53,7 @@
   "tapToStop": "ਰੋਕਣ ਲਈ ਟੈਪ ਕਰੋ",
   "setUpVoiceByDescribing": "ਚਿੱਤਰ ਬਿਆਨ ਕਰਕੇ ਆਵਾਜ਼ ਸੈੱਟ ਕਰੋ ",
   "describingTheImage": "ਚਿੱਤਰ ਬਿਆਨ ਕਰੋ।",
-  "takesUnder30Seconds": "30 ਸਕਿੰਟ ਤੋਂ ਘੱਟ ਸਮਾਂ ਲਗਦਾ ਹੈ।",
+  "takesUnder15Seconds": "15 ਸਕਿੰਟ ਤੋਂ ਘੱਟ ਸਮਾਂ ਲਗਦਾ ਹੈ।",
   "tapToStartSpeaking": "ਬੋਲਣਾ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ",
   "recordingPercent": "ਰਿਕਾਰਡਿੰਗ... {percent}%",
   "reRecord": "ਦੁਬਾਰਾ ਰਿਕਾਰਡ ਕਰੋ",

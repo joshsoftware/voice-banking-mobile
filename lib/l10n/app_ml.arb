@@ -53,7 +53,7 @@
   "tapToStop": "നിർത്താൻ ടാപ്പ് ചെയ്യുക",
   "setUpVoiceByDescribing": "ഇമേജ് വിവരിച്ച് വോയ്‌സ് സജ്ജമാക്കുക ",
   "describingTheImage": "ഇമേജ് വിവരിക്കുക.",
-  "takesUnder30Seconds": "30 സെക്കൻഡിനുള്ളിൽ പൂർത്തിയാകും.",
+  "takesUnder15Seconds": "15 സെക്കൻഡിനുള്ളിൽ പൂർത്തിയാകും.",
   "tapToStartSpeaking": "സംസാരിക്കാൻ ആരംഭിക്കാൻ ടാപ്പ് ചെയ്യുക",
   "recordingPercent": "റെക്കോർഡിംഗ്... {percent}%",
   "reRecord": "വീണ്ടും റെക്കോർഡ് ചെയ്യുക",

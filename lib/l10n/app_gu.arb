@@ -53,7 +53,7 @@
   "tapToStop": "બંધ કરવા ટૅપ કરો",
   "setUpVoiceByDescribing": "ઇમેજ વર્ણન કરીને વૉઇસ સેટ કરો ",
   "describingTheImage": "ઇમેજ વર્ણન કરો.",
-  "takesUnder30Seconds": "30 સેકંડથી ઓછા સમયમાં પૂર્ણ થાય છે.",
+  "takesUnder15Seconds": "15 સેકંડથી ઓછા સમયમાં પૂર્ણ થાય છે.",
   "tapToStartSpeaking": "બોલવું શરૂ કરવા ટૅપ કરો",
   "recordingPercent": "રેકોર્ડિંગ... {percent}%",
   "reRecord": "ફરી રેકોર્ડ કરો",

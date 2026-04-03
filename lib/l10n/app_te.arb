@@ -53,7 +53,7 @@
   "tapToStop": "ఆపడానికి టాప్ చేయండి",
   "setUpVoiceByDescribing": "చిత్రాన్ని వివరించడం ద్వారా మీ వాయిస్ సెటప్ చేయండి ",
   "describingTheImage": "చిత్రాన్ని వివరించండి.",
-  "takesUnder30Seconds": "30 సెకన్లలోపు పూర్తవుతుంది.",
+  "takesUnder15Seconds": "15 సెకన్లలోపు పూర్తవుతుంది.",
   "tapToStartSpeaking": "మాట్లాడటం ప్రారంభించడానికి టాప్ చేయండి",
   "recordingPercent": "రికార్డింగ్... {percent}%",
   "reRecord": "మళ్లీ రికార్డ్ చేయండి",
