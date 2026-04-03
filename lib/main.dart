@@ -27,6 +27,7 @@ class VoiceBankingApp extends ConsumerWidget {
       theme: AppTheme.light,
       routerConfig: AppRouter.router,
       locale: localeAsync.valueOrNull,
+      debugShowCheckedModeBanner: false,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,

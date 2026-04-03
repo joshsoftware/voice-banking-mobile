@@ -27,7 +27,7 @@ class VoiceBankHomeState {
   final List<Transaction> recentTransactions;
 
   const VoiceBankHomeState({
-    this.userName = 'Isha Kulkarni',
+    this.userName = 'User',
     this.balance = 45250.75,
     this.accountType = 'Savings Account',
     this.maskedAccountNumber = '****7890',

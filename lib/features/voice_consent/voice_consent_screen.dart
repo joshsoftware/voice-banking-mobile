@@ -107,7 +107,7 @@ class VoiceConsentScreen extends ConsumerWidget {
                 _StartRegistrationButton(
                   enabled: state.isConsentGiven,
                   label: l10n.startRegistration,
-                  onTap: () => context.push('/voice-registration'),
+                  onTap: () => context.pushReplacement('/voice-registration'),
                 ),
                 const SizedBox(height: 16),
                 _SkipButton(

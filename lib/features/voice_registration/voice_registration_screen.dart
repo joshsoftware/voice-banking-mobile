@@ -203,10 +203,10 @@ class _VoiceRegistrationScreenState
       child: Column(
         children: [
           const SizedBox(height: 12),
-          _ProgressIndicator(currentIndex: state.currentImageIndex),
+          // _ProgressIndicator(currentIndex: state.currentImageIndex),
           const SizedBox(height: 16),
           _Header(l10n: l10n),
-          const SizedBox(height: 24),
+          const SizedBox(height: 30),
           _ImageCard(
             currentIndex: state.currentImageIndex,
             imagePaths: state.selectedImagePaths,
@@ -349,7 +349,7 @@ class _Header extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Text(
-          l10n.takesUnder30Seconds,
+          l10n.takesUnder15Seconds,
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w400,

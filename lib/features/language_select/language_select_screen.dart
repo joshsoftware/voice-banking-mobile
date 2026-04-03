@@ -20,16 +20,44 @@ class _LanguageSelectColors {
 
 /// Language selection screen – displayed after OTP verification.
 /// Matches Figma design node 119:1827.
-class LanguageSelectScreen extends ConsumerWidget {
+class LanguageSelectScreen extends ConsumerStatefulWidget {
   const LanguageSelectScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LanguageSelectScreen> createState() =>
+      _LanguageSelectScreenState();
+}
+
+class _LanguageSelectScreenState extends ConsumerState<LanguageSelectScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Do not read/write other providers in [build]. Sync saved locale after layout.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final loc = ref.read(localeNotifierProvider).valueOrNull;
+      if (loc != null) {
+        ref
+            .read(languageSelectViewModelProvider.notifier)
+            .initFromSavedLocale(loc);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // If locale was still loading on first frame, apply when it resolves.
+    ref.listen<AsyncValue<Locale?>>(localeNotifierProvider, (previous, next) {
+      final loc = next.valueOrNull;
+      if (loc != null) {
+        ref
+            .read(languageSelectViewModelProvider.notifier)
+            .initFromSavedLocale(loc);
+      }
+    });
+
     final state = ref.watch(languageSelectViewModelProvider);
     final vm = ref.read(languageSelectViewModelProvider.notifier);
-    final localeAsync = ref.watch(localeNotifierProvider);
-    final locale = localeAsync.valueOrNull;
-    if (locale != null) vm.initFromSavedLocale(locale);
 
     final l10n = AppLocalizations.of(context)!;
     final greeting = _greeting(l10n);
