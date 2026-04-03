@@ -176,7 +176,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get describingTheImage => 'प्रतिमा वर्णन करा.';
 
   @override
-  String get takesUnder30Seconds => '30 सेकंदांत पूर्ण होते.';
+  String get takesUnder15Seconds => '15 सेकंदांत पूर्ण होते.';
 
   @override
   String get tapToStartSpeaking => 'बोलणे सुरू करण्यासाठी टॅप करा';

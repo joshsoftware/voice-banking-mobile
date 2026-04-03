@@ -178,7 +178,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get describingTheImage => 'describing the image.';
 
   @override
-  String get takesUnder30Seconds => 'Takes under 30 seconds.';
+  String get takesUnder15Seconds => 'Takes under 15 seconds.';
 
   @override
   String get tapToStartSpeaking => 'Tap to start speaking';

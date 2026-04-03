@@ -178,7 +178,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get describingTheImage => 'ছবিটি বর্ণনা করুন।';
 
   @override
-  String get takesUnder30Seconds => '৩০ সেকেন্ডের কম সময় লাগে।';
+  String get takesUnder15Seconds => '১৫ সেকেন্ডের কম সময় লাগে।';
 
   @override
   String get tapToStartSpeaking => 'বলতে শুরু করতে ট্যাপ করুন';

@@ -179,7 +179,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get describingTheImage => 'चित्र का वर्णन करें।';
 
   @override
-  String get takesUnder30Seconds => '30 सेकंड से कम समय लगता है।';
+  String get takesUnder15Seconds => '15 सेकंड से कम समय लगता है।';
 
   @override
   String get tapToStartSpeaking => 'बोलना शुरू करने के लिए टैप करें';

@@ -180,7 +180,7 @@ class AppLocalizationsKn extends AppLocalizations {
   String get describingTheImage => 'ಚಿತ್ರವನ್ನು ವಿವರಿಸಿ.';
 
   @override
-  String get takesUnder30Seconds => '30 ಸೆಕೆಂಡ್‌ಗಳಲ್ಲಿ ಪೂರ್ಣಗೊಳ್ಳುತ್ತದೆ.';
+  String get takesUnder15Seconds => '15 ಸೆಕೆಂಡ್‌ಗಳಲ್ಲಿ ಪೂರ್ಣಗೊಳ್ಳುತ್ತದೆ.';
 
   @override
   String get tapToStartSpeaking => 'ಮಾತನಾಡಲು ಪ್ರಾರಂಭಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ';

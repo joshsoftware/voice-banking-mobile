@@ -177,7 +177,7 @@ class AppLocalizationsPa extends AppLocalizations {
   String get describingTheImage => 'ਚਿੱਤਰ ਬਿਆਨ ਕਰੋ।';
 
   @override
-  String get takesUnder30Seconds => '30 ਸਕਿੰਟ ਤੋਂ ਘੱਟ ਸਮਾਂ ਲਗਦਾ ਹੈ।';
+  String get takesUnder15Seconds => '15 ਸਕਿੰਟ ਤੋਂ ਘੱਟ ਸਮਾਂ ਲਗਦਾ ਹੈ।';
 
   @override
   String get tapToStartSpeaking => 'ਬੋਲਣਾ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ';

@@ -180,7 +180,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get describingTheImage => 'చిత్రాన్ని వివరించండి.';
 
   @override
-  String get takesUnder30Seconds => '30 సెకన్లలోపు పూర్తవుతుంది.';
+  String get takesUnder15Seconds => '15 సెకన్లలోపు పూర్తవుతుంది.';
 
   @override
   String get tapToStartSpeaking => 'మాట్లాడటం ప్రారంభించడానికి టాప్ చేయండి';

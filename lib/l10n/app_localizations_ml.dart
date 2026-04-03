@@ -179,7 +179,7 @@ class AppLocalizationsMl extends AppLocalizations {
   String get describingTheImage => 'ഇമേജ് വിവരിക്കുക.';
 
   @override
-  String get takesUnder30Seconds => '30 സെക്കൻഡിനുള്ളിൽ പൂർത്തിയാകും.';
+  String get takesUnder15Seconds => '15 സെക്കൻഡിനുള്ളിൽ പൂർത്തിയാകും.';
 
   @override
   String get tapToStartSpeaking => 'സംസാരിക്കാൻ ആരംഭിക്കാൻ ടാപ്പ് ചെയ്യുക';

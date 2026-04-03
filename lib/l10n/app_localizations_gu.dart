@@ -177,7 +177,7 @@ class AppLocalizationsGu extends AppLocalizations {
   String get describingTheImage => 'ઇમેજ વર્ણન કરો.';
 
   @override
-  String get takesUnder30Seconds => '30 સેકંડથી ઓછા સમયમાં પૂર્ણ થાય છે.';
+  String get takesUnder15Seconds => '15 સેકંડથી ઓછા સમયમાં પૂર્ણ થાય છે.';
 
   @override
   String get tapToStartSpeaking => 'બોલવું શરૂ કરવા ટૅપ કરો';

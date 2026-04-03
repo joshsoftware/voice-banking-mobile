@@ -432,11 +432,11 @@ abstract class AppLocalizations {
   /// **'describing the image.'**
   String get describingTheImage;
 
-  /// No description provided for @takesUnder30Seconds.
+  /// No description provided for @takesUnder15Seconds.
   ///
   /// In en, this message translates to:
-  /// **'Takes under 30 seconds.'**
-  String get takesUnder30Seconds;
+  /// **'Takes under 15 seconds.'**
+  String get takesUnder15Seconds;
 
   /// No description provided for @tapToStartSpeaking.
   ///
