@@ -13,6 +13,14 @@ class AppConfig {
   /// SharedPreferences key for stored locale (e.g. 'en', 'hi').
   static const String localeStorageKey = 'app_locale';
 
+  /// Mock auth session (any mobile + [mockLoginOtp] on OTP screen).
+  static const String mockLoginOtp = '1234';
+
+  /// SharedPreferences keys for persisted login session after OTP success.
+  static const String authSessionLoggedInKey = 'auth_session_logged_in';
+  static const String authSessionMobileKey = 'auth_session_mobile';
+  static const String authSessionOtpKey = 'auth_session_otp';
+
   // -- Pipecat voice session -----------------------------------------------
 
   /// Voice server origin (same as the web client). Native code calls

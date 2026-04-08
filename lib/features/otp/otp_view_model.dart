@@ -72,7 +72,7 @@ class OtpViewModel extends AutoDisposeNotifier<OtpState> {
 
   Future<void> verify({
     required String expectedOtp,
-    required void Function() onSuccess,
+    required Future<void> Function() onSuccess,
   }) async {
     final otp = state.otp.trim();
     final error = validateOtp(otp);
@@ -87,8 +87,11 @@ class OtpViewModel extends AutoDisposeNotifier<OtpState> {
     await Future<void>.delayed(const Duration(milliseconds: 500));
 
     if (otp == expectedOtp) {
-      state = state.copyWith(isLoading: false);
-      onSuccess();
+      try {
+        await onSuccess();
+      } finally {
+        state = state.copyWith(isLoading: false);
+      }
     } else {
       state = state.copyWith(
         isLoading: false,

@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/constants/app_config.dart';
+
 /// State for the landing / login screen.
 class LandingState {
   final String mobileNumber;
@@ -57,8 +59,7 @@ class LandingViewModel extends Notifier<LandingState> {
     await Future<void>.delayed(const Duration(milliseconds: 800));
 
     state = state.copyWith(isLoading: false);
-    const otp = '1234';
-    onSuccess(mobile, otp);
+    onSuccess(mobile, AppConfig.mockLoginOtp);
   }
 }
 

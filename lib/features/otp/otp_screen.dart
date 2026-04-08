@@ -6,7 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:pinput/pinput.dart';
 
 import '../../core/constants/app_assets.dart';
+import '../../core/providers/providers.dart';
 import '../../core/router/app_router.dart';
+import '../../core/services/auth_session_repository.dart';
 import '../../l10n/app_localizations.dart';
 import 'otp_view_model.dart';
 
@@ -167,7 +169,15 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                           onChanged: vm.setOtp,
                           onCompleted: (_) => vm.verify(
                             expectedOtp: widget.params.otp,
-                            onSuccess: () => context.go('/home'),
+                            onSuccess: () async {
+                              final prefs =
+                                  await ref.read(sharedPreferencesProvider.future);
+                              await AuthSessionRepository(prefs).saveSession(
+                                mobileNumber: widget.params.mobileNumber,
+                                otp: widget.params.otp,
+                              );
+                              if (context.mounted) context.go('/home');
+                            },
                           ),
                           enabled: !state.isLoading,
                         ),
