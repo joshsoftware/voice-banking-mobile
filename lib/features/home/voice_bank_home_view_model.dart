@@ -56,7 +56,7 @@ class VoiceBankHomeState {
 class VoiceBankHomeViewModel extends AutoDisposeNotifier<VoiceBankHomeState> {
   @override
   VoiceBankHomeState build() {
-    return VoiceBankHomeState(
+    return const VoiceBankHomeState(
       recentTransactions: _mockTransactions,
     );
   }

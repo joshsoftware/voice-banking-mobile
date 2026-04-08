@@ -10,7 +10,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      colorScheme: ColorScheme.light(
+      colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
         onPrimary: AppColors.textOnPrimary,
         secondary: AppColors.accent,

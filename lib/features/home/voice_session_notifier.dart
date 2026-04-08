@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../core/constants/app_config.dart';
 import '../../core/logging/app_logger.dart';
@@ -92,6 +93,16 @@ class VoiceSessionNotifier extends AutoDisposeNotifier<VoiceSessionState> {
     _resetPipecatLiveVoiceUi(controller);
     _clearPipecatSessionChat(controller);
     try {
+      final micStatus = await Permission.microphone.request();
+      if (!micStatus.isGranted) {
+        state = state.copyWith(
+          isBusy: false,
+          lastError:
+              'Microphone permission is required. Please enable it in Settings.',
+        );
+        return;
+      }
+
       final headersJson = AppConfig.pipecatRequestHeadersJson.trim().isEmpty
           ? null
           : AppConfig.pipecatRequestHeadersJson;
