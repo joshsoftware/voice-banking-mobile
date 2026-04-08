@@ -69,7 +69,6 @@ dependencies:
 
   # Device ID for voice registration
   device_info_plus: ^11.1.0
-  android_id: ^0.5.1
 
 dev_dependencies:
   flutter_test:

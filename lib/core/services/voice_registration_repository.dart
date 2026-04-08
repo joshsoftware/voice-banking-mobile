@@ -7,8 +7,6 @@ import 'package:path_provider/path_provider.dart';
 
 import '../constants/app_config.dart';
 
-import 'package:android_id/android_id.dart';
-
 /// Repository for voice registration (enrollment) API.
 /// Uploads 3 audio files to create voiceprint.
 class VoiceRegistrationRepository {
@@ -70,11 +68,10 @@ class VoiceRegistrationRepository {
       final deviceInfo = DeviceInfoPlugin();
 
       if (Platform.isAndroid) {
-        const androidIdPlugin = AndroidId();
-        final String? id = await androidIdPlugin.getId();
-        if (id != null && id.isNotEmpty) return id;
         final info = await deviceInfo.androidInfo;
-        return '${info.manufacturer}_${info.model}_${info.device}'
+        final id = info.id;
+        if (id.isNotEmpty) return id;
+        return '${info.manufacturer}_${info.model}_${info.device}_${info.fingerprint}'
             .replaceAll(' ', '_');
       }
 
